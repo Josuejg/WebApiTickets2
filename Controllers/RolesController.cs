@@ -24,5 +24,14 @@ namespace WebApiTikects.Controllers
         {
             return await _contexto.Roles.ToListAsync();
         }
+
+        [HttpGet("{ro_identificador}")]
+        public async Task<ActionResult<Roles>> GetRoles(int ro_identificador)
+        {
+
+            var rol = await _contexto.Roles.FindAsync(ro_identificador);
+            if (rol == null) return NotFound();
+            return rol;
+        }
     }
 }

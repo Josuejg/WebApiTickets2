@@ -33,5 +33,49 @@ namespace WebApiTikects.Controllers
             if (rol == null) return NotFound();
             return rol;
         }
+
+
+        [HttpPost]
+
+        public async Task<ActionResult<Roles>> CreateRoles(Roles rol)
+        {
+
+            rol.ro_fecha_adicion = DateTime.UtcNow;
+            _contexto.Roles.Add(rol);
+            await _contexto.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetRoles), new { id = rol.ro_identificador }, rol);
+        }
+
+        [HttpPut("{ro_identificador}")]
+        public async Task<ActionResult> UpdateRoles(int ro_identificador, Roles rol)
+        {
+            if (ro_identificador != rol.ro_identificador) return BadRequest();
+            var rolExistente = await _contexto.Roles.FindAsync(rol.ro_identificador);
+            if (rolExistente == null) return NotFound();
+
+            rolExistente.ro_descripcion = rol.ro_descripcion;
+            rolExistente.ro_fecha_adicion = rol.ro_fecha_adicion;
+            rolExistente.ro_adicionado_por = rol.ro_adicionado_por;
+            rolExistente.ro_fecha_modificacion = rol.ro_fecha_modificacion;
+            rolExistente.ro_modificado_por = rol.ro_modificado_por;
+
+            await _contexto.SaveChangesAsync();
+            return Ok(); // o NoContent()
+        }
+
+        [HttpDelete("ro_identificador")]
+
+        public async Task<ActionResult> DeleteRoles(int ro_indentificador) 
+        {
+            var rol = await _contexto.Roles.FindAsync(ro_indentificador);
+            if (rol == null) return NotFound();
+
+            _contexto.Roles.Remove(rol);
+            await _contexto.SaveChangesAsync();
+
+            return NoContent();
+
+        }
+
     }
 }

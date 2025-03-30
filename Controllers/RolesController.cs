@@ -43,7 +43,7 @@ namespace WebApiTikects.Controllers
             rol.ro_fecha_adicion = DateTime.UtcNow;
             _contexto.Roles.Add(rol);
             await _contexto.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetRoles), new { id = rol.ro_identificador }, rol);
+            return CreatedAtAction(nameof(GetRoles), new { ro_identificador = rol.ro_identificador }, rol);
         }
 
         [HttpPut("{ro_identificador}")]

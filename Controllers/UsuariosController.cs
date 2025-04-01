@@ -23,11 +23,11 @@ namespace WebApiTikects.Controllers
 
         }
 
-        [HttpGet("{us_identificador}")]
-        public async Task<ActionResult<Usuarios>> GetUsuarios(int us_identificador)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Usuarios>> GetUsuarios(int id)
         {
 
-            var user = await _contexto.Usuarios.FindAsync(us_identificador);
+            var user = await _contexto.Usuarios.FindAsync(id);
             if (user == null) return NotFound();
             return user;
         }
@@ -44,10 +44,10 @@ namespace WebApiTikects.Controllers
             return CreatedAtAction(nameof(CreateUsuarios), new { us_fecha_adicion = user.us_fecha_adicion }, user);
         }
 
-        [HttpPut("{us_identificador}")]
-        public async Task<ActionResult> UpdateUsuarios(int us_identificador, Usuarios user)
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateUsuarios(int id, Usuarios user)
         {
-            if (us_identificador != user.us_identificador) return BadRequest();
+            if (id != user.us_identificador) return BadRequest();
             var userExistente = await _contexto.Usuarios.FindAsync(user.us_identificador);
             if (userExistente == null) return NotFound();
 

@@ -46,10 +46,10 @@ namespace WebApiTikects.Controllers
             return CreatedAtAction(nameof(GetRoles), new { ro_identificador = rol.ro_identificador }, rol);
         }
 
-        [HttpPut("{ro_identificador}")]
-        public async Task<ActionResult> UpdateRoles(int ro_identificador, Roles rol)
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateRoles(int id, Roles rol)
         {
-            if (ro_identificador != rol.ro_identificador) return BadRequest();
+            if (id != rol.ro_identificador) return BadRequest();
             var rolExistente = await _contexto.Roles.FindAsync(rol.ro_identificador);
             if (rolExistente == null) return NotFound();
 
@@ -63,11 +63,11 @@ namespace WebApiTikects.Controllers
             return Ok(); // o NoContent()
         }
 
-        [HttpDelete("ro_identificador")]
+        [HttpDelete("id")]
 
-        public async Task<ActionResult> DeleteRoles(int ro_indentificador) 
+        public async Task<ActionResult> DeleteRoles(int id) 
         {
-            var rol = await _contexto.Roles.FindAsync(ro_indentificador);
+            var rol = await _contexto.Roles.FindAsync(id);
             if (rol == null) return NotFound();
 
             _contexto.Roles.Remove(rol);

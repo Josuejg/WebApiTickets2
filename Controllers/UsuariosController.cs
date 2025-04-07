@@ -31,18 +31,41 @@ namespace WebApiTikects.Controllers
             if (user == null) return NotFound();
             return user;
         }
+        [HttpGet("porcorreo/{correo}")]
+        public async Task<ActionResult<Usuarios>> GetUsuarioPorCorreo(string correo)
+        {
+            var user = await _contexto.Usuarios
+                .FirstOrDefaultAsync(u => u.us_correo.ToLower() == correo.ToLower());
+
+            if (user == null)
+                return NotFound();
+
+            return user;
+        }
+
 
 
         [HttpPost]
-
         public async Task<ActionResult<Usuarios>> CreateUsuarios(Usuarios user)
         {
+            try
+            {
+                user.us_estado = "A";
+                user.us_adicionado_por = "sistema";
+                user.us_fecha_adicion = DateTime.UtcNow;
 
-            user.us_fecha_adicion = DateTime.UtcNow;
-            _contexto.Usuarios.Add(user);
-            await _contexto.SaveChangesAsync();
-            return CreatedAtAction(nameof(CreateUsuarios), new { us_fecha_adicion = user.us_fecha_adicion }, user);
+                _contexto.Usuarios.Add(user);
+                await _contexto.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(CreateUsuarios), new { user.us_identificador }, user);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al guardar usuario: {ex.Message}");
+                return StatusCode(500, "Error interno al guardar usuario.");
+            }
         }
+
 
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateUsuarios(int id, Usuarios user)
@@ -65,11 +88,11 @@ namespace WebApiTikects.Controllers
             return Ok(); // o NoContent()
         }
 
-        [HttpDelete("us_identificador")]
+        [HttpDelete("id")]
 
-        public async Task<ActionResult> DeleteUsuarios(int us_identificador)
+        public async Task<ActionResult> DeleteUsuarios(int id)
         {
-            var User = await _contexto.Usuarios.FindAsync(us_identificador);
+            var User = await _contexto.Usuarios.FindAsync(id);
             if (User == null) return NotFound();
 
             _contexto.Usuarios.Remove(User);
@@ -78,6 +101,25 @@ namespace WebApiTikects.Controllers
             return NoContent();
 
         }
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginModel login)
+        {
+            var usuario = await _contexto.Usuarios.FirstOrDefaultAsync(u =>
+                u.us_correo.ToLower().Trim() == login.us_correo.ToLower().Trim() &&
+                u.us_clave == login.us_clave);
+
+            if (usuario == null)
+                return Unauthorized();
+
+            return Ok(new
+            {
+                usuario.us_identificador,
+                usuario.us_nombre_completo,
+                usuario.us_correo
+            });
+        }
+
+
 
     }
 }

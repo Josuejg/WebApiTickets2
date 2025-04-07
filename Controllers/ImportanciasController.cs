@@ -70,6 +70,18 @@ namespace WebApiTikects.Controllers
 
             return NoContent();
         }
+        // 
+        [HttpPost("login")]
+        public async Task<ActionResult> Login([FromBody] LoginModel login)
+        {
+            var usuario = await _contexto.Usuarios.FirstOrDefaultAsync(u =>
+                u.us_correo == login.us_correo && u.us_clave == login.us_clave);
+
+            if (usuario == null)
+                return Unauthorized();
+
+            return Ok(new { usuario.us_identificador, usuario.us_nombre_completo });
+        }
     }
 
 }

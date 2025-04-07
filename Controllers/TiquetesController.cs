@@ -35,6 +35,32 @@ namespace WebApiTikects.Controllers
             return tick;
         }
 
+        [HttpGet("soporte/registradoshoy/{correo}")]
+        public async Task<ActionResult<int>> GetTiquetesCreadosHoy(string correo)
+        {
+            var hoy = DateTime.UtcNow.Date;
+
+            int cantidad = await _contexto.Tiquetes
+                .CountAsync(t => t.ti_adicionado_por.ToLower() == correo.ToLower()
+                              && t.ti_fecha_adicion.Date == hoy);
+
+            return Ok(cantidad);
+        }
+        [HttpGet("analista/resueltoshoy/{idAnalista}")]
+        public async Task<ActionResult<int>> GetTiquetesResueltosHoy(int idAnalista)
+        {
+            var hoy = DateTime.UtcNow.Date;
+
+            int cantidad = await _contexto.Tiquetes
+                .CountAsync(t => t.ti_us_id_asigna == idAnalista
+                              && t.ti_estado == "Resuelto"
+                              && t.ti_fecha_modificacion.HasValue
+                              && t.ti_fecha_modificacion.Value.Date == hoy);
+
+            return Ok(cantidad);
+        }
+
+
         [HttpPost]
         public async Task<ActionResult<Tiquetes>> CreateTiquetes(Tiquetes tick)
         {
@@ -44,13 +70,15 @@ namespace WebApiTikects.Controllers
             return CreatedAtAction(nameof(GetTiquetes), new { id = tick.ti_identificador }, tick);
 
         }
-
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateTiquetes(int id, Tiquetes tick)
         {
-            if (id != tick.ti_identificador) return BadRequest();
+            if (id != tick.ti_identificador)
+                return BadRequest(new { error = "El ID de la URL no coincide con el del cuerpo." });
+
             var tickExistente = await _contexto.Tiquetes.FindAsync(tick.ti_identificador);
-            if (tickExistente == null) return NotFound();
+            if (tickExistente == null)
+                return NotFound(new { error = "Ticket no encontrado en la base de datos." });
 
             tickExistente.ti_asunto = tick.ti_asunto;
             tickExistente.ti_ca_id = tick.ti_ca_id;
@@ -62,9 +90,19 @@ namespace WebApiTikects.Controllers
             tickExistente.ti_fecha_modificacion = tick.ti_fecha_modificacion;
             tickExistente.ti_modificado_por = tick.ti_modificado_por;
 
-            await _contexto.SaveChangesAsync();
-            return Ok(); // o NoContent()
+            try
+            {
+                await _contexto.SaveChangesAsync();
+                return Ok(new { message = "Actualizado correctamente" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = $"Error al guardar: {ex.Message}" });
+            }
         }
+
+
+
 
         [HttpDelete("ti_identificador")]
 
